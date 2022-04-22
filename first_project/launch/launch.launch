@@ -1,0 +1,5 @@
+<launch>
+
+    <node pkg="first_project" type="velocity_sub" name="my_velocity_sub" output="screen" />
+
+</launch>
