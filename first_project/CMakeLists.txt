@@ -12,7 +12,9 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   sensor_msgs
   std_msgs
+  nav_msgs
   tf2
+  tf2_ros
 )
 
 ## System dependencies are found with CMake's conventions
@@ -153,9 +155,21 @@ add_library(subscriber_class src/Subscriber.cpp)
 add_dependencies(subscriber_class ${catkin_EXPORTED_TARGETS})
 target_link_libraries(subscriber_class ${catkin_LIBRARIES})
 
+add_library(odometry_class src/Odometry.cpp)
+add_dependencies(odometry_class ${catkin_EXPORTED_TARGETS})
+target_link_libraries(odometry_class ${catkin_LIBRARIES})
+
 add_executable(velocity_sub src/velocity_sub.cpp)
 add_dependencies(velocity_sub ${catkin_EXPORTED_TARGETS})
 target_link_libraries(velocity_sub ${catkin_LIBRARIES} subscriber_class)
+
+add_executable(odometry_sub src/odometry_sub.cpp)
+add_dependencies(odometry_sub ${catkin_EXPORTED_TARGETS})
+target_link_libraries(odometry_sub ${catkin_LIBRARIES} odometry_class)
+
+add_executable(tf2_broad src/broadcaster_tf2.cpp)
+add_dependencies(tf2_broad ${catkin_EXPORTED_TARGETS})
+target_link_libraries(tf2_broad ${catkin_LIBRARIES})
 
 #############
 ## Install ##
