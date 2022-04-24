@@ -70,7 +70,10 @@ void Subscriber::odometryCallback(const geometry_msgs::TwistStamped::ConstPtr& m
     nav_msgs::Odometry response;
 
     response.header.frame_id = "world";
+<<<<<<< HEAD
     //response.header.child_frame_id = "base_link";
+=======
+>>>>>>> fe61b5c757e2f914270410b385ef528c1da9f7b1
     response.header.stamp = ros::Time::now();
 
     response.pose.pose.position.x = parameters.x;

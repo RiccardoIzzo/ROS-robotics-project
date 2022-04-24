@@ -2,7 +2,10 @@
 
     <node pkg="first_project" type="velocity_sub" name="my_velocity_sub" output="screen" />
     <node pkg="first_project" type="odometry_sub" name="my_odometry_sub" output="screen" />
+<<<<<<< HEAD
     <node pkg="first_project" type = "tf2_broad" name = "tf_broad"/>
     <node pkg="rviz" type="rviz" name="rviz" args="-d $(find first_project)/test.rviz" />
+=======
+>>>>>>> fe61b5c757e2f914270410b385ef528c1da9f7b1
 
 </launch>

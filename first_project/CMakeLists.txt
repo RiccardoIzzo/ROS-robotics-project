@@ -167,10 +167,13 @@ add_executable(odometry_sub src/odometry_sub.cpp)
 add_dependencies(odometry_sub ${catkin_EXPORTED_TARGETS})
 target_link_libraries(odometry_sub ${catkin_LIBRARIES} odometry_class)
 
+<<<<<<< HEAD
 add_executable(tf2_broad src/broadcaster_tf2.cpp)
 add_dependencies(tf2_broad ${catkin_EXPORTED_TARGETS})
 target_link_libraries(tf2_broad ${catkin_LIBRARIES})
 
+=======
+>>>>>>> fe61b5c757e2f914270410b385ef528c1da9f7b1
 #############
 ## Install ##
 #############
