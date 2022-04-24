@@ -21,9 +21,10 @@ public:
   geometry_msgs::Vector3 calcAngularVelocity(double z);
   geometry_msgs::Vector3 computeEuler(double delta_t);
   geometry_msgs::Vector3 computeRungeKutta(double delta_t);
+  ros::NodeHandle n; 
 
 private:
-  ros::NodeHandle n; 
+  
   ros::Subscriber sub;
   ros::Publisher pub;
   geometry_msgs::Vector3 lin_vel;

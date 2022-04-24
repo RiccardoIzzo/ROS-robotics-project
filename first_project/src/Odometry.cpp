@@ -32,14 +32,23 @@ Subscriber::Subscriber() { // class constructor
   this->v_y;                                  // previous v_y read on /cmd_vel topic (Vy)
   this->w_z;                                  // previous w_z read on /cmd_vel topic (Wz)
   this->lastTime;                             // time of the last message
-  // (x, y, ϑ)
-  this->x_k = 0;
-  this->y_k = 0;
-  this->theta = 0;
+
 }
 
 void Subscriber::main_loop() {
   ros::Rate loop_rate(10);
+
+  double init_x;
+  double init_y;
+  double init_theta;
+
+  this->n.getParam("init_x", init_x);
+  this->n.getParam("init_y", init_y);
+  this->n.getParam("init_theta", init_theta);
+
+  this->x_k = init_x;
+  this->y_k = init_y;
+  this->theta = init_theta;
 
   while (ros::ok()) {
     ros::spinOnce();
@@ -63,7 +72,7 @@ void Subscriber::odometryCallback(const geometry_msgs::TwistStamped::ConstPtr& m
         parameters = this->computeRungeKutta(delta_t);
         break;
     }
-    
+
     tf2::Quaternion myQuaternion;
     myQuaternion.setRPY(0, 0, parameters.z);
 

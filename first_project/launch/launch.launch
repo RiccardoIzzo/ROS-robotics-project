@@ -4,5 +4,8 @@
     <node pkg="first_project" type="odometry_sub" name="my_odometry_sub" output="screen" />
     <node pkg="first_project" type = "tf2_broad" name = "tf_broad"/>
     <node pkg="rviz" type="rviz" name="rviz" args="-d $(find first_project)/test.rviz" />
+    <param name="init_x" value="3.0" />
+    <param name="init_y" value="3.0" />
+    <param name="init_theta" value="1.6" />
 
 </launch>
