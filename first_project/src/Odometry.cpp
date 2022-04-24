@@ -120,3 +120,13 @@ geometry_msgs::Vector3 Subscriber::computeRungeKutta(double delta_t){
   this->theta = theta_k1;
   return asVector3(x_k1, y_k1, theta_k1);
 }
+
+int main(int argc, char **argv) {
+  ros::init(argc, argv, "odometry_sub");
+
+  Subscriber my_subscriber;
+
+  my_subscriber.main_loop();
+
+  return 0;
+}

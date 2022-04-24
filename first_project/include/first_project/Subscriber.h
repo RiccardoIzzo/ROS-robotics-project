@@ -17,6 +17,7 @@ public:
   void main_loop();
   void countCallback(const sensor_msgs::JointState::ConstPtr& msg);
   void odometryCallback(const geometry_msgs::TwistStamped::ConstPtr& msg);
+  void controlCallback(const geometry_msgs::TwistStamped::ConstPtr& msg);
   geometry_msgs::Vector3 calcForwardVelocity(double x, double y);
   geometry_msgs::Vector3 calcAngularVelocity(double z);
   geometry_msgs::Vector3 computeEuler(double delta_t);

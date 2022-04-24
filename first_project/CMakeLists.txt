@@ -15,6 +15,7 @@ find_package(catkin REQUIRED COMPONENTS
   nav_msgs
   tf2
   tf2_ros
+  message_generation
 )
 
 ## System dependencies are found with CMake's conventions
@@ -51,11 +52,10 @@ find_package(catkin REQUIRED COMPONENTS
 ##   * add every package in MSG_DEP_SET to generate_messages(DEPENDENCIES ...)
 
 ## Generate messages in the 'msg' folder
-# add_message_files(
-#   FILES
-#   Message1.msg
-#   Message2.msg
-# )
+add_message_files(
+  FILES
+  Wheels_RPM.msg
+)
 
 ## Generate services in the 'srv' folder
 # add_service_files(
@@ -72,10 +72,10 @@ find_package(catkin REQUIRED COMPONENTS
 # )
 
 ## Generate added messages and services with any dependencies listed here
-# generate_messages(
-#   DEPENDENCIES
-#   geometry_msgs#   sensor_msgs#   std_msgs
-# )
+generate_messages(
+  DEPENDENCIES
+  std_msgs
+)
 
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
@@ -109,8 +109,7 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES first_project
-#  CATKIN_DEPENDS geometry_msgs roscpp sensor_msgs std_msgs tf2
-#  DEPENDS system_lib
+  ##CATKIN_DEPENDS message_runtime
 )
 
 ###########
@@ -151,25 +150,22 @@ include_directories(include ${catkin_INCLUDE_DIRS})
 #   ${catkin_LIBRARIES}
 # )
 
-add_library(subscriber_class src/Subscriber.cpp)
-add_dependencies(subscriber_class ${catkin_EXPORTED_TARGETS})
-target_link_libraries(subscriber_class ${catkin_LIBRARIES})
+add_executable(velocity_class src/Velocity.cpp)
+add_dependencies(velocity_class ${catkin_EXPORTED_TARGETS})
+target_link_libraries(velocity_class ${catkin_LIBRARIES})
 
-add_library(odometry_class src/Odometry.cpp)
+add_executable(odometry_class src/Odometry.cpp)
 add_dependencies(odometry_class ${catkin_EXPORTED_TARGETS})
 target_link_libraries(odometry_class ${catkin_LIBRARIES})
 
-add_executable(velocity_sub src/velocity_sub.cpp)
-add_dependencies(velocity_sub ${catkin_EXPORTED_TARGETS})
-target_link_libraries(velocity_sub ${catkin_LIBRARIES} subscriber_class)
+add_executable(control_class src/Control.cpp)
+add_dependencies(control_class ${catkin_EXPORTED_TARGETS})
+target_link_libraries(control_class ${catkin_LIBRARIES})
 
-add_executable(odometry_sub src/odometry_sub.cpp)
-add_dependencies(odometry_sub ${catkin_EXPORTED_TARGETS})
-target_link_libraries(odometry_sub ${catkin_LIBRARIES} odometry_class)
-
-add_executable(tf2_broad src/broadcaster_tf2.cpp)
+add_executable(tf2_broad src/Broadcaster.cpp)
 add_dependencies(tf2_broad ${catkin_EXPORTED_TARGETS})
 target_link_libraries(tf2_broad ${catkin_LIBRARIES})
+
 
 #############
 ## Install ##
@@ -198,6 +194,7 @@ target_link_libraries(tf2_broad ${catkin_LIBRARIES})
 #   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 #   RUNTIME DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION}
 # )
+
 
 ## Mark cpp header files for installation
 # install(DIRECTORY include/${PROJECT_NAME}/
