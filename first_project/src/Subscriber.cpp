@@ -12,12 +12,6 @@
 #define L 0.200 //wheel position along x (l)
 #define W 0.169 //wheel position along y (w)
 
-// Kinematic model matrix of a robot with four mecanum wheels
-double matrix[3][4] = {-L-W, 1, -1,
-                        L+W, 1,  1,
-                        L+W, 1, -1,
-                       -L-W, 1,  1};
-
 // Return a vector with three components
 geometry_msgs::Vector3 asVector3(double x, double y, double z)
 {
@@ -30,8 +24,9 @@ geometry_msgs::Vector3 asVector3(double x, double y, double z)
 }
 
 Subscriber::Subscriber() { // class constructor
-  // all initializations here
+  //subscriber that listen on "/wheel_states" topic
   this->sub = this->n.subscribe("/wheel_states", 1000, &Subscriber::countCallback, this);
+  //publisher that publish a geometry_msgs/TwistStamped message on "/odom" topic
   this->pub = this->n.advertise<geometry_msgs::TwistStamped>("/cmd_vel", 1000);
 
   auto lin_vel = geometry_msgs::Vector3(); // linear velocity
@@ -52,7 +47,7 @@ void Subscriber::main_loop() {
 }
 
 void Subscriber::countCallback(const sensor_msgs::JointState::ConstPtr& msg) {
-  double d_time;
+  double delta_t;
   // Need at least two messages in order to compute the velocities of the wheels
   if(number_of_messages != 0){
     // Compute position of 4 wheels
@@ -68,14 +63,14 @@ void Subscriber::countCallback(const sensor_msgs::JointState::ConstPtr& msg) {
 
     double secs = msg->header.stamp.sec - this->previous_time_sec;
     // check if there is a difference in terms of seconds
-    if(secs > 0) d_time = secs - this->previous_time_nsec + msg->header.stamp.nsec;
-    else d_time = msg->header.stamp.nsec - this->previous_time_nsec;
+    if(secs > 0) delta_t = secs - this->previous_time_nsec + msg->header.stamp.nsec;
+    else delta_t = msg->header.stamp.nsec - this->previous_time_nsec;
     
     // Compute angular velocities of each wheel
-    double w_fl = pos_fl / d_time / N / T * 2.0 * M_PI * pow(10.0, 9.0);
-    double w_fr = pos_fr / d_time / N / T * 2.0 *  M_PI * pow(10.0, 9.0);
-    double w_rl = pos_rl / d_time / N / T * 2.0 *  M_PI * pow(10.0, 9.0);
-    double w_rr = pos_rr / d_time / N / T * 2.0 *  M_PI * pow(10.0, 9.0);
+    double w_fl = pos_fl / delta_t / N / T * 2.0 * M_PI * pow(10.0, 9.0);
+    double w_fr = pos_fr / delta_t / N / T * 2.0 * M_PI * pow(10.0, 9.0);
+    double w_rl = pos_rl / delta_t / N / T * 2.0 * M_PI * pow(10.0, 9.0);
+    double w_rr = pos_rr / delta_t / N / T * 2.0 * M_PI * pow(10.0, 9.0);
 
     ROS_INFO("Seq: %d", msg->header.seq);
     ROS_INFO("Velocity front left: [%lf]", w_fl);
@@ -84,8 +79,6 @@ void Subscriber::countCallback(const sensor_msgs::JointState::ConstPtr& msg) {
     ROS_INFO("Velocity rear right: [%lf]\n", w_rr);
 
     // Prepare to publish a message of type "geometry_msgs::TwistStamped" on /cmd_vel topic
-    ros::NodeHandle n;
-    ros::Publisher pub = n.advertise<geometry_msgs::TwistStamped>("cmd_vel", 1000);
     geometry_msgs::TwistStamped response;
 
     response.header.frame_id = "";
@@ -95,10 +88,10 @@ void Subscriber::countCallback(const sensor_msgs::JointState::ConstPtr& msg) {
     double v_x = (w_fl + w_fr + w_rl + w_rr) * WHEEL_RADIUS / 4;
 
     // Transversal velocity: Vy
-    double v_y = (-w_fl + w_fr - w_rl + w_rr) * WHEEL_RADIUS / 4;
+    double v_y = (-w_fl + w_fr - w_rr + w_rl) * WHEEL_RADIUS / 4;
 
     // Angular velocity: Wz
-    double w_z = (-w_fl + w_fr + w_rl - w_rr) * WHEEL_RADIUS / 4 / (L + W);
+    double w_z = (-w_fl + w_fr + w_rr - w_rl) * WHEEL_RADIUS / 4 / (L + W);
 
     // Compute three components
     response.twist.linear = calcForwardVelocity(v_x, v_y);

@@ -1,5 +1,6 @@
 <launch>
 
     <node pkg="first_project" type="velocity_sub" name="my_velocity_sub" output="screen" />
+    <node pkg="first_project" type="odometry_sub" name="my_odometry_sub" output="screen" />
 
 </launch>
