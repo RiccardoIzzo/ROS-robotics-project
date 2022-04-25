@@ -6,10 +6,9 @@
 #include "nav_msgs/Odometry.h"
 #include "tf2/LinearMath/Quaternion.h"
 #include "first_project/Reset.h"
-#include "math.h"
-
 #include <first_project/paramConfig.h>
 #include <dynamic_reconfigure/server.h>
+#include "math.h"
 
 // Return a vector with three components
 geometry_msgs::Vector3 asVector3(double x, double y, double z)
@@ -27,21 +26,12 @@ Subscriber::Subscriber() { // class constructor
   this->sub = this->n.subscribe("/cmd_vel", 1000, &Subscriber::odometryCallback, this);
   //publisher that publish a nav_msgs/Odometry message on "/odom" topic
   this->pub = this->n.advertise<nav_msgs::Odometry>("/odom", 1000);
-  //by default the integration method is Euler
-  //this->integMethod = Euler;
 
-  auto parameters = geometry_msgs::Vector3(); // linear velocity
+  this->integMethod = 0;                      //by default the integration method is Euler (0: Euler, 1: RK)
   this->number_of_messages = 0;               // number of messages read on /cmd_vel topic
-  this->v_x;                                  // previous v_x read on /cmd_vel topic (Vx)
-  this->v_y;                                  // previous v_y read on /cmd_vel topic (Vy)
-  this->w_z;                                  // previous w_z read on /cmd_vel topic (Wz)
-  this->lastTime;                             // time of the last message
-
-  this->x_k;
-  this->y_k;
-  this->theta;
 }
 
+// reset the robot pose with the values specified in terminal with "rosservice call /reset ..."
 bool reset_callback(double *x_k, double *y_k, double *theta, first_project::Reset::Request &req, first_project::Reset::Response &res) {
   res.old_x = *x_k;
   *x_k = req.new_x;
@@ -57,39 +47,13 @@ bool reset_callback(double *x_k, double *y_k, double *theta, first_project::Rese
   return true;
 }
 
-void Subscriber::main_loop() {
-  double init_x;
-  double init_y;
-  double init_theta;
-
-  // get parameters from launch file (launch.launch)
-  this->n.getParam("init_x", init_x);
-  this->n.getParam("init_y", init_y);
-  this->n.getParam("init_theta", init_theta);
-
-  // initialize the parameters with the initial value described in the launch file
-  this->x_k = init_x;
-  this->y_k = init_y;
-  this->theta = init_theta;
-
-  //start the service "/reset" that allow to reset the odometry to any given pose (x, y, ϑ)
-  ros::ServiceServer service = 
-    n.advertiseService<first_project::Reset::Request, first_project::Reset::Response>("reset", boost::bind(&reset_callback, &this->x_k, &this->y_k, &this->theta, _1, _2) 
-  );
-
-  ros::Rate loop_rate(10);
-
-  while (ros::ok()) {
-    ros::spinOnce();
-    loop_rate.sleep();
-  }
-}
-
+// change the integration method with "rosrun rqt_reconfigure rqt_reconfigure"
 void param_callback(int* integMethod, first_project::paramConfig &config, uint32_t level) {
   ROS_INFO("Integration method: %d - Level %d", config.integMethod, level);
   *integMethod = config.integMethod;
 }
 
+// manage the odometry with two different integration methods (Euler, Runge-Kutta)
 void Subscriber::odometryCallback(const geometry_msgs::TwistStamped::ConstPtr& msg) {
   double delta_t;
   // Need at least two messages in order to compute the odometry
@@ -134,6 +98,35 @@ void Subscriber::odometryCallback(const geometry_msgs::TwistStamped::ConstPtr& m
   this->number_of_messages++;
 }
 
+void Subscriber::main_loop() {
+  double init_x;
+  double init_y;
+  double init_theta;
+
+  // get parameters from launch file (launch.launch)
+  this->n.getParam("init_x", init_x);
+  this->n.getParam("init_y", init_y);
+  this->n.getParam("init_theta", init_theta);
+
+  // initialize the parameters with the initial value described in the launch file
+  this->x_k = init_x;
+  this->y_k = init_y;
+  this->theta = init_theta;
+
+  //start the service "/reset" that allow to reset the odometry to any given pose (x, y, ϑ)
+  ros::ServiceServer service = 
+    n.advertiseService<first_project::Reset::Request, first_project::Reset::Response>("reset", boost::bind(&reset_callback, &this->x_k, &this->y_k, &this->theta, _1, _2) 
+  );
+
+  ros::Rate loop_rate(10);
+
+  while (ros::ok()) {
+    ros::spinOnce();
+    loop_rate.sleep();
+  }
+}
+
+// compute Euler integration
 geometry_msgs::Vector3 Subscriber::computeEuler(double delta_t){
   double x_k1 = this->x_k + (v_x * cos(theta) + v_y * cos(theta + M_PI_2)) * delta_t;
   double y_k1 = this->y_k + (v_x * sin(theta) + v_y * sin(theta + M_PI_2)) * delta_t;
@@ -144,6 +137,7 @@ geometry_msgs::Vector3 Subscriber::computeEuler(double delta_t){
   return asVector3(x_k1, y_k1, theta_k1);
 }
 
+// compute Runge-Kutta integration
 geometry_msgs::Vector3 Subscriber::computeRungeKutta(double delta_t){
   double coeff = (w_z * delta_t) / 2; //(Wk * Ts) / 2
   double x_k1 = this->x_k + (v_x * cos(theta + coeff) + v_y * cos(theta + M_PI_2 + coeff)) * delta_t;
@@ -159,12 +153,11 @@ int main(int argc, char **argv) {
   ros::init(argc, argv, "odometry_sub");
 
   Subscriber my_subscriber;
-  int integMethod = 0;
 
-  //Dynamic reconfigure
+  // Dynamic reconfigure of integration method
   dynamic_reconfigure::Server<first_project::paramConfig> dynServer;
   dynamic_reconfigure::Server<first_project::paramConfig>::CallbackType f;
-  f = boost::bind(&param_callback, &integMethod, _1, _2);
+  f = boost::bind(&param_callback, &my_subscriber.integMethod, _1, _2);
   dynServer.setCallback(f);
 
   my_subscriber.main_loop();

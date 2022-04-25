@@ -6,11 +6,11 @@
 #include "geometry_msgs/TwistStamped.h"
 #include "math.h"
 
-#define N 42 //Counts per revolution (CPR)
-#define T 5 //Gear ratio
+#define N 42              //Counts per revolution (CPR)
+#define T 5               //Gear ratio
 #define WHEEL_RADIUS 0.07 //wheel radius (r)
-#define L 0.200 //wheel position along x (l)
-#define W 0.169 //wheel position along y (w)
+#define L 0.200           //wheel position along x (l)
+#define W 0.169           //wheel position along y (w)
 
 // Return a vector with three components
 geometry_msgs::Vector3 asVector3(double x, double y, double z)
@@ -25,16 +25,11 @@ geometry_msgs::Vector3 asVector3(double x, double y, double z)
 
 Subscriber::Subscriber() { // class constructor
   //subscriber that listen on "/wheel_states" topic
-  this->sub = this->n.subscribe("/wheel_states", 1000, &Subscriber::countCallback, this);
+  this->sub = this->n.subscribe("/wheel_states", 1000, &Subscriber::velocityCallback, this);
   //publisher that publish a geometry_msgs/TwistStamped message on "/odom" topic
   this->pub = this->n.advertise<geometry_msgs::TwistStamped>("/cmd_vel", 1000);
-
-  auto lin_vel = geometry_msgs::Vector3(); // linear velocity
-  auto ang_vel = geometry_msgs::Vector3(); // angular velocity
-  this->number_of_messages = 0;            // number of messages read on /wheel_states topic
-  this->previous_positions[4];             // previous positions read on /wheel_states topic
-  this->previous_time_sec;                 // previous time (seconds) read on /wheel_states topic
-  this->previous_time_nsec;                // previous time (nanoseconds) read on /wheel_states topic
+  // number of messages read on /wheel_states topic
+  this->number_of_messages = 0;            
 }
 
 void Subscriber::main_loop() {
@@ -46,7 +41,7 @@ void Subscriber::main_loop() {
   }
 }
 
-void Subscriber::countCallback(const sensor_msgs::JointState::ConstPtr& msg) {
+void Subscriber::velocityCallback(const sensor_msgs::JointState::ConstPtr& msg) {
   double delta_t;
   // Need at least two messages in order to compute the velocities of the wheels
   if(number_of_messages != 0){

@@ -4,6 +4,7 @@
 #include <tf2_ros/transform_broadcaster.h>
 #include <geometry_msgs/TransformStamped.h>
 
+// TfBroad class that manages the TF odom->base_link
 class TfBroad
 {
 public:
@@ -21,8 +22,8 @@ public:
     transformStamped.transform.translation.y = msg->pose.pose.position.y;
     transformStamped.transform.translation.z = 0.0;
     // set theta
-    //tf2::Quaternion q;
-    //q.setRPY(0, 0, msg->theta);
+    // tf2::Quaternion q;
+    // q.setRPY(0, 0, msg->theta);
     transformStamped.transform.rotation.x = msg->pose.pose.orientation.x;
     transformStamped.transform.rotation.y = msg->pose.pose.orientation.y;
     transformStamped.transform.rotation.z = msg->pose.pose.orientation.z;
