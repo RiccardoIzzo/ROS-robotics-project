@@ -7,6 +7,9 @@
 #include "tf2/LinearMath/Quaternion.h"
 #include "math.h"
 
+#include <first_project/paramConfig.h>
+#include <dynamic_reconfigure/server.h>
+
 // Return a vector with three components
 geometry_msgs::Vector3 asVector3(double x, double y, double z)
 {
@@ -24,7 +27,7 @@ Subscriber::Subscriber() { // class constructor
   //publisher that publish a nav_msgs/Odometry message on "/odom" topic
   this->pub = this->n.advertise<nav_msgs::Odometry>("/odom", 1000);
   //by default the integration method is Euler
-  this->integMethod = Euler;
+  //this->integMethod = Euler;
 
   auto parameters = geometry_msgs::Vector3(); // linear velocity
   this->number_of_messages = 0;               // number of messages read on /cmd_vel topic
@@ -56,6 +59,14 @@ void Subscriber::main_loop() {
   }
 }
 
+void param_callback(int* integMethod, first_project::paramConfig &config, uint32_t level) {
+  ROS_INFO("Integration method: %d - Level %d",
+            config.integMethod,
+            level);
+  
+  *integMethod = config.integMethod;
+}
+
 void Subscriber::odometryCallback(const geometry_msgs::TwistStamped::ConstPtr& msg) {
   double delta_t;
   // Need at least two messages in order to compute the odometry
@@ -64,7 +75,7 @@ void Subscriber::odometryCallback(const geometry_msgs::TwistStamped::ConstPtr& m
     delta_t = curr_time - this->lastTime;
 
     auto parameters = geometry_msgs::Vector3();
-    switch(this->integMethod){
+    switch(/*this->integMethod*/ integMethod){
       case Euler:
         parameters = this->computeEuler(delta_t);
         break;
@@ -125,6 +136,13 @@ int main(int argc, char **argv) {
   ros::init(argc, argv, "odometry_sub");
 
   Subscriber my_subscriber;
+  int integMethod = 0;
+
+  //Dynamic reconfigure
+  dynamic_reconfigure::Server<first_project::paramConfig> dynServer;
+  dynamic_reconfigure::Server<first_project::paramConfig>::CallbackType f;
+  f = boost::bind(&param_callback, &integMethod, _1, _2);
+  dynServer.setCallback(f);
 
   my_subscriber.main_loop();
 
