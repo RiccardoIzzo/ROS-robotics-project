@@ -7,6 +7,7 @@
 #include "geometry_msgs/TwistStamped.h"
 #include "sensor_msgs/JointState.h"
 #include "nav_msgs/Odometry.h"
+#include "first_project/Reset.h"
 
 // Subscriber class
 class Subscriber {
@@ -22,7 +23,13 @@ public:
   geometry_msgs::Vector3 calcAngularVelocity(double z);
   geometry_msgs::Vector3 computeEuler(double delta_t);
   geometry_msgs::Vector3 computeRungeKutta(double delta_t);
-  ros::NodeHandle n; 
+
+  // global parameters: must be visible to both the launch file and the service callback function in Odometry.cpp
+  double x_k;
+  double y_k;
+  double theta;
+
+  ros::NodeHandle n;
 
 private:
   
@@ -39,9 +46,6 @@ private:
   double previous_time_sec;
   double previous_time_nsec;
   double lastTime;
-  double x_k;
-  double y_k;
-  double theta;
   IntegrationMethod integMethod;
 };
 

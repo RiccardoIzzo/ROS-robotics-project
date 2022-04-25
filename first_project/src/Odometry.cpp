@@ -5,6 +5,7 @@
 #include "geometry_msgs/TwistStamped.h"
 #include "nav_msgs/Odometry.h"
 #include "tf2/LinearMath/Quaternion.h"
+#include "first_project/Reset.h"
 #include "math.h"
 
 #include <first_project/paramConfig.h>
@@ -36,22 +37,47 @@ Subscriber::Subscriber() { // class constructor
   this->w_z;                                  // previous w_z read on /cmd_vel topic (Wz)
   this->lastTime;                             // time of the last message
 
+  this->x_k;
+  this->y_k;
+  this->theta;
+}
+
+bool reset_callback(double *x_k, double *y_k, double *theta, first_project::Reset::Request &req, first_project::Reset::Response &res) {
+  res.old_x = *x_k;
+  *x_k = req.new_x;
+
+  res.old_y = *y_k;
+  *y_k = req.new_y;
+
+  res.old_theta = *theta;
+  *theta = req.new_theta;
+
+  ROS_INFO("Request to reset pose to [%lf, %lf, %lf] - Responding with old pose: [%lf, %lf, %lf]",
+  (double)req.new_x, (double)req.new_y, (double)req.new_theta, (double)res.old_x, (double)res.old_y, (double)res.old_theta);
+  return true;
 }
 
 void Subscriber::main_loop() {
-  ros::Rate loop_rate(10);
-
   double init_x;
   double init_y;
   double init_theta;
 
+  // get parameters from launch file (launch.launch)
   this->n.getParam("init_x", init_x);
   this->n.getParam("init_y", init_y);
   this->n.getParam("init_theta", init_theta);
 
+  // initialize the parameters with the initial value described in the launch file
   this->x_k = init_x;
   this->y_k = init_y;
   this->theta = init_theta;
+
+  //start the service "/reset" that allow to reset the odometry to any given pose (x, y, ϑ)
+  ros::ServiceServer service = 
+    n.advertiseService<first_project::Reset::Request, first_project::Reset::Response>("reset", boost::bind(&reset_callback, &this->x_k, &this->y_k, &this->theta, _1, _2) 
+  );
+
+  ros::Rate loop_rate(10);
 
   while (ros::ok()) {
     ros::spinOnce();
@@ -60,10 +86,7 @@ void Subscriber::main_loop() {
 }
 
 void param_callback(int* integMethod, first_project::paramConfig &config, uint32_t level) {
-  ROS_INFO("Integration method: %d - Level %d",
-            config.integMethod,
-            level);
-  
+  ROS_INFO("Integration method: %d - Level %d", config.integMethod, level);
   *integMethod = config.integMethod;
 }
 
@@ -75,7 +98,7 @@ void Subscriber::odometryCallback(const geometry_msgs::TwistStamped::ConstPtr& m
     delta_t = curr_time - this->lastTime;
 
     auto parameters = geometry_msgs::Vector3();
-    switch(/*this->integMethod*/ integMethod){
+    switch(integMethod){
       case Euler:
         parameters = this->computeEuler(delta_t);
         break;
