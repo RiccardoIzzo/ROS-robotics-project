@@ -10,9 +10,9 @@
 
 #define N 42              //Counts per revolution (CPR)
 #define T 5               //Gear ratio
-#define WHEEL_RADIUS 0.07 //wheel radius (r)
-#define L 0.200           //wheel position along x (l)
-#define W 0.169           //wheel position along y (w)
+#define WHEEL_RADIUS 0.077 //wheel radius (r)
+#define L 0.200         //wheel position along x (l)
+#define W 0.169         //wheel position along y (w)
 
 Subscriber::Subscriber() { // class constructor
   //subscriber that listen on "/cmd_vel" topic

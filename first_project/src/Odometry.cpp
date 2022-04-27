@@ -10,6 +10,8 @@
 #include <dynamic_reconfigure/server.h>
 #include "math.h"
 
+#define POW 1.0e9
+
 // Return a vector with three components
 geometry_msgs::Vector3 asVector3(double x, double y, double z)
 {
@@ -32,7 +34,7 @@ Subscriber::Subscriber() { // class constructor
 }
 
 // reset the robot pose with the values specified in terminal with "rosservice call /reset ..."
-bool reset_callback(double *x_k, double *y_k, double *theta, first_project::Reset::Request &req, first_project::Reset::Response &res) {
+bool reset_callback(double *x_k, double *y_k, double *theta, long int *number_of_messages, first_project::Reset::Request &req, first_project::Reset::Response &res) {
   res.old_x = *x_k;
   *x_k = req.new_x;
 
@@ -41,6 +43,8 @@ bool reset_callback(double *x_k, double *y_k, double *theta, first_project::Rese
 
   res.old_theta = *theta;
   *theta = req.new_theta;
+
+  *number_of_messages = 0;
 
   ROS_INFO("Request to reset pose to [%lf, %lf, %lf] - Responding with old pose: [%lf, %lf, %lf]",
   (double)req.new_x, (double)req.new_y, (double)req.new_theta, (double)res.old_x, (double)res.old_y, (double)res.old_theta);
@@ -58,7 +62,7 @@ void Subscriber::odometryCallback(const geometry_msgs::TwistStamped::ConstPtr& m
   double delta_t;
   // Need at least two messages in order to compute the odometry
   if(number_of_messages != 0){
-    double curr_time = msg->header.stamp.sec;
+    double curr_time = msg->header.stamp.sec + msg->header.stamp.nsec/POW;
     delta_t = curr_time - this->lastTime;
 
     auto parameters = geometry_msgs::Vector3();
@@ -94,7 +98,7 @@ void Subscriber::odometryCallback(const geometry_msgs::TwistStamped::ConstPtr& m
   this->v_x = msg->twist.linear.x;
   this->v_y = msg->twist.linear.y;
   this->w_z = msg->twist.angular.z;
-  this->lastTime = msg->header.stamp.sec;
+  this->lastTime = msg->header.stamp.sec + msg->header.stamp.nsec/POW ;
   this->number_of_messages++;
 }
 
@@ -115,7 +119,7 @@ void Subscriber::main_loop() {
 
   //start the service "/reset" that allow to reset the odometry to any given pose (x, y, ϑ)
   ros::ServiceServer service = 
-    n.advertiseService<first_project::Reset::Request, first_project::Reset::Response>("reset", boost::bind(&reset_callback, &this->x_k, &this->y_k, &this->theta, _1, _2) 
+    n.advertiseService<first_project::Reset::Request, first_project::Reset::Response>("reset", boost::bind(&reset_callback, &this->x_k, &this->y_k, &this->theta, &this->number_of_messages, _1, _2) 
   );
 
   ros::Rate loop_rate(10);

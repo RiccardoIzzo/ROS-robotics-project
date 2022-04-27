@@ -8,9 +8,10 @@
 
 #define N 42              //Counts per revolution (CPR)
 #define T 5               //Gear ratio
-#define WHEEL_RADIUS 0.07 //wheel radius (r)
-#define L 0.200           //wheel position along x (l)
-#define W 0.169           //wheel position along y (w)
+#define WHEEL_RADIUS 0.075 //wheel radius (r)
+#define L 0.190       //wheel position along x (l)
+#define W 0.160       //wheel position along y (w)
+#define POW 1.0e9
 
 // Return a vector with three components
 geometry_msgs::Vector3 asVector3(double x, double y, double z)
@@ -58,20 +59,21 @@ void Subscriber::velocityCallback(const sensor_msgs::JointState::ConstPtr& msg) 
 
     double secs = msg->header.stamp.sec - this->previous_time_sec;
     // check if there is a difference in terms of seconds
-    if(secs > 0) delta_t = secs - this->previous_time_nsec + msg->header.stamp.nsec;
-    else delta_t = msg->header.stamp.nsec - this->previous_time_nsec;
+    if(secs > 0) delta_t = secs - this->previous_time_nsec/POW + msg->header.stamp.nsec/POW;
+    else delta_t = msg->header.stamp.nsec/POW - this->previous_time_nsec/POW;
     
     // Compute angular velocities of each wheel
-    double w_fl = pos_fl / delta_t / N / T * 2.0 * M_PI * pow(10.0, 9.0);
-    double w_fr = pos_fr / delta_t / N / T * 2.0 * M_PI * pow(10.0, 9.0);
-    double w_rl = pos_rl / delta_t / N / T * 2.0 * M_PI * pow(10.0, 9.0);
-    double w_rr = pos_rr / delta_t / N / T * 2.0 * M_PI * pow(10.0, 9.0);
+    double w_fl = pos_fl / delta_t / N / T * 2.0 * M_PI;
+    double w_fr = pos_fr / delta_t / N / T * 2.0 * M_PI;
+    double w_rl = pos_rl / delta_t / N / T * 2.0 * M_PI;
+    double w_rr = pos_rr / delta_t / N / T * 2.0 * M_PI;
 
     ROS_INFO("Seq: %d", msg->header.seq);
     ROS_INFO("Velocity front left: [%lf]", w_fl);
     ROS_INFO("Velocity front right: [%lf]", w_fr);
     ROS_INFO("Velocity rear left: [%lf]", w_rl);
     ROS_INFO("Velocity rear right: [%lf]\n", w_rr);
+    
 
     // Prepare to publish a message of type "geometry_msgs::TwistStamped" on /cmd_vel topic
     geometry_msgs::TwistStamped response;
