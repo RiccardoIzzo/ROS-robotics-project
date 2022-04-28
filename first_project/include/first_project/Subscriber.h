@@ -31,6 +31,10 @@ public:
   double theta;
   // integration method selector that can change with dynamic reconfigure
   int integMethod;
+  int N; 
+  double L;  
+  double W;  
+  double RADIUS;       
 
 private:
   ros::Subscriber sub;

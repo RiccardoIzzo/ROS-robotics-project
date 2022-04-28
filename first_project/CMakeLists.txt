@@ -79,6 +79,7 @@ generate_messages(
 
 generate_dynamic_reconfigure_options(
   cfg/param.cfg
+  cfg/calibration_param.cfg
 )
 
 ################################################

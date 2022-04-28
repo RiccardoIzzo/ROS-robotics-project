@@ -4,13 +4,11 @@
 #include "std_msgs/String.h"
 #include "sensor_msgs/JointState.h"
 #include "geometry_msgs/TwistStamped.h"
+#include <dynamic_reconfigure/server.h>
+#include <first_project/calibration_paramConfig.h>
 #include "math.h"
 
-#define N 42              //Counts per revolution (CPR)
 #define T 5               //Gear ratio
-#define WHEEL_RADIUS 0.075 //wheel radius (r)
-#define L 0.190       //wheel position along x (l)
-#define W 0.160       //wheel position along y (w)
 #define POW 1.0e9
 
 // Return a vector with three components
@@ -30,7 +28,11 @@ Subscriber::Subscriber() { // class constructor
   //publisher that publish a geometry_msgs/TwistStamped message on "/odom" topic
   this->pub = this->n.advertise<geometry_msgs::TwistStamped>("/cmd_vel", 1000);
   // number of messages read on /wheel_states topic
-  this->number_of_messages = 0;            
+  this->number_of_messages = 0;     
+  this->N = 42; 
+  this->L = 0.077;  
+  this->W = 0.200;  
+  this->RADIUS = 0.169;          
 }
 
 void Subscriber::main_loop() {
@@ -40,6 +42,14 @@ void Subscriber::main_loop() {
     ros::spinOnce();
     loop_rate.sleep();
   }
+}
+
+void calibration_param_callback(int* N, double* L, double* W, double* RADIUS, first_project::calibration_paramConfig &config, uint32_t level) {
+  //ROS_INFO("Integration method: %d - Level %d", config.integMethod, level);
+  *N = config.n_param;
+  *L = config.l_param;
+  *W = config.w_param;
+  *RADIUS = config.wheel_radius_param;
 }
 
 void Subscriber::velocityCallback(const sensor_msgs::JointState::ConstPtr& msg) {
@@ -63,10 +73,10 @@ void Subscriber::velocityCallback(const sensor_msgs::JointState::ConstPtr& msg) 
     else delta_t = msg->header.stamp.nsec/POW - this->previous_time_nsec/POW;
     
     // Compute angular velocities of each wheel
-    double w_fl = pos_fl / delta_t / N / T * 2.0 * M_PI;
-    double w_fr = pos_fr / delta_t / N / T * 2.0 * M_PI;
-    double w_rl = pos_rl / delta_t / N / T * 2.0 * M_PI;
-    double w_rr = pos_rr / delta_t / N / T * 2.0 * M_PI;
+    double w_fl = pos_fl / delta_t / this->N / T * 2.0 * M_PI;
+    double w_fr = pos_fr / delta_t / this->N / T * 2.0 * M_PI;
+    double w_rl = pos_rl / delta_t / this->N / T * 2.0 * M_PI;
+    double w_rr = pos_rr / delta_t / this->N / T * 2.0 * M_PI;
 
     ROS_INFO("Seq: %d", msg->header.seq);
     ROS_INFO("Velocity front left: [%lf]", w_fl);
@@ -82,13 +92,13 @@ void Subscriber::velocityCallback(const sensor_msgs::JointState::ConstPtr& msg) 
     response.header.stamp = ros::Time::now();
 
     // Longitudinal velocity: Vx
-    double v_x = (w_fl + w_fr + w_rl + w_rr) * WHEEL_RADIUS / 4;
+    double v_x = (w_fl + w_fr + w_rl + w_rr) * this->RADIUS / 4;
 
     // Transversal velocity: Vy
-    double v_y = (-w_fl + w_fr - w_rr + w_rl) * WHEEL_RADIUS / 4;
+    double v_y = (-w_fl + w_fr - w_rr + w_rl) * this->RADIUS / 4;
 
     // Angular velocity: Wz
-    double w_z = (-w_fl + w_fr + w_rr - w_rl) * WHEEL_RADIUS / 4 / (L + W);
+    double w_z = (-w_fl + w_fr + w_rr - w_rl) * this->RADIUS / 4 / (this->L + this->W);
 
     // Compute three components
     response.twist.linear = calcForwardVelocity(v_x, v_y);
@@ -122,6 +132,12 @@ int main(int argc, char **argv) {
   ros::init(argc, argv, "velocity_sub");
   
   Subscriber my_subscriber;
+
+  // Dynamic reconfigure of integration method
+  dynamic_reconfigure::Server<first_project::calibration_paramConfig> dynServer;
+  dynamic_reconfigure::Server<first_project::calibration_paramConfig>::CallbackType f;
+  f = boost::bind(&calibration_param_callback, &my_subscriber.N, &my_subscriber.L, &my_subscriber.W, &my_subscriber.RADIUS, _1, _2);
+  dynServer.setCallback(f);
 
   my_subscriber.main_loop();
 
