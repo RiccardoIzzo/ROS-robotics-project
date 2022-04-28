@@ -80,7 +80,7 @@ void Subscriber::odometryCallback(const geometry_msgs::TwistStamped::ConstPtr& m
 
     nav_msgs::Odometry response;
 
-    response.header.frame_id = "world";
+    response.header.frame_id = "odom";
     //response.header.child_frame_id = "base_link";
     response.header.stamp = ros::Time::now();
 

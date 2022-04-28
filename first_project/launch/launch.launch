@@ -8,5 +8,6 @@
     <param name="init_x" value="0.0" />
     <param name="init_y" value="0.0" />
     <param name="init_theta" value="0.0" />
+    <node pkg="tf2_ros" type="static_transform_publisher" name="static" args="0 0 0 0 0 0 1 world odom " />
 
 </launch>

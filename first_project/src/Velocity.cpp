@@ -29,7 +29,7 @@ Subscriber::Subscriber() { // class constructor
   this->pub = this->n.advertise<geometry_msgs::TwistStamped>("/cmd_vel", 1000);
   // number of messages read on /wheel_states topic
   this->number_of_messages = 0;  
-  this->RADIUS = 0.077;        
+  this->RADIUS = 0.078;        
   this->L = 0.196;  
   this->W = 0.164;    
   this->N = 42;    
