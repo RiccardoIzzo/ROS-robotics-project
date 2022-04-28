@@ -8,7 +8,7 @@
 #include <first_project/calibration_paramConfig.h>
 #include "math.h"
 
-#define T 5               //Gear ratio
+#define T 5        //gear ratio
 #define POW 1.0e9
 
 // Return a vector with three components
@@ -41,7 +41,7 @@ void Subscriber::main_loop() {
 }
 
 void calibration_param_callback(int* N, double* L, double* W, double* RADIUS, first_project::calibration_paramConfig &config, uint32_t level) {
-  //ROS_INFO("Integration method: %d - Level %d", config.integMethod, level);
+  ROS_INFO("Update robot parameters: old[%d, %lf, %lf, %lf] -> new[%d, %lf, %lf, %lf] ", *N, *L, *W, *RADIUS, config.n_param, config.l_param, config.w_param, config.wheel_radius_param);
   *N = config.n_param;
   *L = config.l_param;
   *W = config.w_param;
@@ -57,11 +57,6 @@ void Subscriber::velocityCallback(const sensor_msgs::JointState::ConstPtr& msg) 
     double pos_fr = msg->position[1] - this->previous_positions[1];
     double pos_rl = msg->position[2] - this->previous_positions[2];
     double pos_rr = msg->position[3] - this->previous_positions[3];
-
-    //ROS_INFO("Position front left: [%lf]", pos_fl);
-    //ROS_INFO("Position front right: [%lf]", pos_fr);
-    //ROS_INFO("Position rear left: [%lf]", pos_rl);
-    //ROS_INFO("Position rear right: [%lf]", pos_rr);
 
     double secs = msg->header.stamp.sec - this->previous_time_sec;
     // check if there is a difference in terms of seconds

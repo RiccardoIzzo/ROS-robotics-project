@@ -25,16 +25,20 @@ public:
 
   // global parameters: must be visible to both the launch file and the service callback function in Odometry.cpp
   ros::NodeHandle n;
+  
   // robot pose (x, y, ϑ)
   double x_k;
   double y_k;
   double theta;
-  // integration method selector that can change with dynamic reconfigure
+
+  // integration method selector that can change at runtime
   int integMethod;
-  int N; 
-  double L;  
-  double W;  
-  double RADIUS;       
+
+  // robot parameters that can be modified at runtime
+  int N;          //counts per revolution (CPR)
+  double L;       //wheel position along x (l)
+  double W;       //wheel position along y (w)
+  double RADIUS;  //wheel radius (r)
 
 private:
   ros::Subscriber sub;
