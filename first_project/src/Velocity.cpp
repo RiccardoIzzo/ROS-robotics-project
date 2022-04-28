@@ -28,20 +28,16 @@ Subscriber::Subscriber() { // class constructor
   //publisher that publish a geometry_msgs/TwistStamped message on "/odom" topic
   this->pub = this->n.advertise<geometry_msgs::TwistStamped>("/cmd_vel", 1000);
   // number of messages read on /wheel_states topic
-  this->number_of_messages = 0;     
-  this->N = 42; 
-  this->L = 0.077;  
-  this->W = 0.200;  
-  this->RADIUS = 0.169;          
+  this->number_of_messages = 0;  
+  this->RADIUS = 0.077;        
+  this->L = 0.196;  
+  this->W = 0.164;    
+  this->N = 42;    
 }
 
 void Subscriber::main_loop() {
   ros::Rate loop_rate(10);
-
-  while (ros::ok()) {
-    ros::spinOnce();
-    loop_rate.sleep();
-  }
+  ros::spin();
 }
 
 void calibration_param_callback(int* N, double* L, double* W, double* RADIUS, first_project::calibration_paramConfig &config, uint32_t level) {
