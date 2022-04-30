@@ -28,10 +28,11 @@ Subscriber::Subscriber() { // class constructor
   //publisher that publish a geometry_msgs/TwistStamped message on "/odom" topic
   this->pub = this->n.advertise<geometry_msgs::TwistStamped>("/cmd_vel", 1000);
   // number of messages read on /wheel_states topic
-  this->number_of_messages = 0;  
+  this->old_seq = -1;  
+  this->number_of_messages = 0;
   this->RADIUS = 0.078;        
-  this->L = 0.196;  
-  this->W = 0.164;    
+  this->L = 0.197;  
+  this->W = 0.167;    
   this->N = 42;    
 }
 
@@ -50,8 +51,14 @@ void calibration_param_callback(int* N, double* L, double* W, double* RADIUS, fi
 
 void Subscriber::velocityCallback(const sensor_msgs::JointState::ConstPtr& msg) {
   double delta_t;
+
+  // Reset the number of messages when a new bag is starting
+  if(this->old_seq > msg->header.seq) {
+    this->number_of_messages = 0;
+  }
+
   // Need at least two messages in order to compute the velocities of the wheels
-  if(number_of_messages != 0){
+  if(this->number_of_messages != 0){
     // Compute position of 4 wheels
     double pos_fl = msg->position[0] - this->previous_positions[0];
     double pos_fr = msg->position[1] - this->previous_positions[1];
@@ -99,6 +106,7 @@ void Subscriber::velocityCallback(const sensor_msgs::JointState::ConstPtr& msg) 
   this->previous_positions[3] = msg->position[3];
   this->previous_time_sec = msg->header.stamp.sec;
   this->previous_time_nsec = msg->header.stamp.nsec;
+  this->old_seq = msg->header.seq;
   this->number_of_messages++;
 }
 

@@ -34,6 +34,9 @@ public:
   // integration method selector that can change at runtime
   int integMethod;
 
+  int old_seq;
+  int new_seq;
+
   // robot parameters that can be modified at runtime
   int N;          //counts per revolution (CPR)
   double L;       //wheel position along x (l)
