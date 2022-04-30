@@ -45,8 +45,8 @@ void Subscriber::controlCallback(const geometry_msgs::TwistStamped::ConstPtr& ms
     first_project::Wheels_RPM response;
     response.rpm_fl = u1;
     response.rpm_fr = u2;
-    response.rpm_rr = u3;
-    response.rpm_rl = u4;
+    response.rpm_rl = u3;
+    response.rpm_rr = u4;
 
     this->pub.publish(response);
 }

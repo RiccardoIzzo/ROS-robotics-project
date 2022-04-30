@@ -11,6 +11,7 @@
 #include "math.h"
 
 #define POW 1.0e9
+#define Z 0.25
 
 // Return a vector with three components
 geometry_msgs::Vector3 asVector3(double x, double y, double z)
@@ -86,7 +87,7 @@ void Subscriber::odometryCallback(const geometry_msgs::TwistStamped::ConstPtr& m
 
     response.pose.pose.position.x = parameters.x;
     response.pose.pose.position.y = parameters.y;
-    response.pose.pose.position.z = 0.0;
+    response.pose.pose.position.z = Z;
 
     response.pose.pose.orientation.x = myQuaternion.getX();
     response.pose.pose.orientation.y = myQuaternion.getY();

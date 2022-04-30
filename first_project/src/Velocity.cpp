@@ -68,12 +68,6 @@ void Subscriber::velocityCallback(const sensor_msgs::JointState::ConstPtr& msg) 
     double w_fr = pos_fr / delta_t / this->N / T * 2.0 * M_PI;
     double w_rl = pos_rl / delta_t / this->N / T * 2.0 * M_PI;
     double w_rr = pos_rr / delta_t / this->N / T * 2.0 * M_PI;
-
-    ROS_INFO("Seq: %d", msg->header.seq);
-    ROS_INFO("Velocity front left: [%lf]", w_fl);
-    ROS_INFO("Velocity front right: [%lf]", w_fr);
-    ROS_INFO("Velocity rear left: [%lf]", w_rl);
-    ROS_INFO("Velocity rear right: [%lf]\n", w_rr);
     
 
     // Prepare to publish a message of type "geometry_msgs::TwistStamped" on /cmd_vel topic
