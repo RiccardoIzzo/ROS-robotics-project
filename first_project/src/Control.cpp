@@ -10,8 +10,8 @@
 
 #define N 42               //counts per revolution (CPR)
 #define T 5                //gear ratio
-#define WHEEL_RADIUS 0.078 //wheel radius (r)
-#define L 0.197            //wheel position along x (l)
+#define WHEEL_RADIUS 0.077 //wheel radius (r)
+#define L 0.198            //wheel position along x (l)
 #define W 0.167            //wheel position along y (w)
 
 Subscriber::Subscriber() { // class constructor

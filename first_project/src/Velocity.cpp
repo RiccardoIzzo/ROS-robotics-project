@@ -30,8 +30,8 @@ Subscriber::Subscriber() { // class constructor
   // number of messages read on /wheel_states topic
   this->old_seq = -1;  
   this->number_of_messages = 0;
-  this->RADIUS = 0.078;        
-  this->L = 0.197;  
+  this->RADIUS = 0.077;        
+  this->L = 0.198;  
   this->W = 0.167;    
   this->N = 42;    
 }
