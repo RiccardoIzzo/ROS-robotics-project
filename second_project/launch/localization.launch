@@ -1,0 +1,45 @@
+<launch>
+	
+	<!-- **************  scan_merger **************  -->
+    <include file="$(find second_project)/launch/scan_merger.launch"/>
+	
+	<!--  ************** add odom tf  ***************  -->
+    <node pkg="second_project" type="odom_tf" respawn="false" name="odom_tf" output="screen"/>
+    <node pkg="second_project" type="trajectory_class" name="my_trajectory_sub" output="screen" />
+    <!-- <node pkg="second_project" type="map_data_class" name="my_map_data_sub" output="screen" /> -->
+	
+    <!-- Name of the map to use and initial position -->
+  	<arg name="map_file"       default="$(find second_project)/map.yaml"/> 
+  	<arg name="initial_pose_x" default="0.0"/>
+  	<arg name="initial_pose_y" default="0.0"/>
+  	<arg name="initial_pose_a" default="0.0"/>
+
+  	<arg name="odom_frame_id"   default="odom"/>
+    <arg name="global_frame_id" default="map"/>
+
+	<param name="/use_sim_time" value="true"/>
+
+	<!--  ****** Maps *****  -->
+    <node name="map_server" pkg="map_server" type="map_server" args="$(arg map_file)">
+    <param name="frame_id" value="map"/>
+    </node>
+
+
+    <!--  ****** amcl *****  -->
+    <include file="$(find second_project)/config/amcl.launch.xml">
+    <arg name="scan_topic" value="/scan_multi"/>
+    <arg name="use_map_topic" value="true"/>
+    <arg name="initial_pose_x" value="$(arg initial_pose_x)"/>
+    <arg name="initial_pose_y" value="$(arg initial_pose_y)"/>
+    <arg name="initial_pose_a" value="$(arg initial_pose_a)"/>
+    </include>
+
+    <!-- **************  rviz **************  --> 
+    <node pkg="rviz" type="rviz" name="rviz" args="-d $(find second_project)/localization.rviz" />
+
+
+      
+    
+
+
+</launch>
