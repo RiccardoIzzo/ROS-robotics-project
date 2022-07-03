@@ -1,11 +1,13 @@
-# ROS-robotics-project
+# ROS robotics projects
+**Robotics Project A.Y. 2021-2022**  
+**Professor:** Prof. Matteo Matteucci  
+**Supervisors**: Paolo Cudrano and Simone Mentasti
 
 ## Team
-|      Full name       |  Person code   |
-|:---------------------|:--------------:|
-|Riccardo Izzo         |    10599996    |
-|Valentina Abbattista  |    10866105    |
-|Ossama El Oukili      |    10865312    |
+
+- ###     Riccardo Izzo ([@RiccardoIzzo](https://github.com/RiccardoIzzo))
+- ###     Valentina Abbattista ([@valeabba](https://github.com/valeabba))
+- ###     Ossama El Oukili  ([@ossaleon](https://github.com/ossaleon))
 
 ## Robot characteristics
 Robot image             |  Robot scheme
@@ -57,7 +59,7 @@ Fig.3 - Map creation with gmapping
 ## Sensors
   - [OptiTrack Markers](https://optitrack.com/applications/robotics/)
   - [YDLIDAR G4](https://www.ydlidar.com/products/view/3.html)
-  
+
 ## Development environment and Tools
   - [Ubuntu 18.04](https://releases.ubuntu.com/18.04/)
   - [ROS Melodic 1.0](http://wiki.ros.org/melodic)
