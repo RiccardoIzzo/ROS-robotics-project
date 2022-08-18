@@ -37,7 +37,7 @@ Goals:
 ![rviz plot](assets/rviz_plot.gif "rviz plot")
 
 <p align = "center">
-Fig.1 - Odometry comparison with rviz
+Fig.1 - Odometry comparison with rviz (green: reference odometry, red: our approximation)
 </p>
 
 ![accuracy plot](assets/accuracy_plot.gif "accuracy plot")
